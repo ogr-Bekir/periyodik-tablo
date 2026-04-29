@@ -9,9 +9,9 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Geçersiz formül' });
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
-    return res.status(500).json({ error: 'Sunucu yapılandırma hatası' });
+    return res.status(500).json({ error: 'Sunucu yapılandırma hatası: GROQ_API_KEY eksik' });
   }
 
   const prompt = `Sen kapsamlı bir kimya uzmanısın. Kullanıcı şu element kombinasyonunu girdi: ${formula}
@@ -21,42 +21,38 @@ Bu kombinasyondan oluşabilecek TÜM olası bileşikleri analiz et. Hem organik 
 Şu başlıkları kullan ve Türkçe yaz:
 
 **Olası Bileşikler:**
-Her bileşik için ayrı satırda:
+Her bileşik için:
 - Kimyasal formül ve IUPAC adı
 - Bağ türü: iyonik / kovalent / polar kovalent / metalik / koordinasyon
-- Fiziksel özellikler: hal (katı/sıvı/gaz), renk, erime/kaynama noktası
-- Kullanım alanları ve önemi
+- Fiziksel özellikler: hal, renk, erime/kaynama noktası
+- Kullanım alanları
 
 **Organik Bileşikler (varsa):**
-- Fonksiyonel gruplar
-- Homolog seri / organik sınıf (alkan, alken, alkol, asit vb.)
-- Endüstriyel / biyolojik önemi
+- Fonksiyonel gruplar, organik sınıf (alkan, alken, alkol, asit vb.)
+- Endüstriyel veya biyolojik önemi
 
 **Anot ve Katot Reaksiyonları (varsa):**
 - Elektroliz reaksiyonları
-- Anotta yükseltgenme: ...
-- Katotta indirgenme: ...
+- Anotta yükseltgenme, katotta indirgenme
 
 **İzotoplar:**
-- Her elementin önemli izotopları, kararlı/radyoaktif durumu, özel kullanımları
+- Her elementin önemli izotopları, kararlı/radyoaktif durumu
 
 **Bağ ve Yapı Özeti:**
 - Lewis yapısı veya bağ açıklaması
-- Geometri (varsa: doğrusal, açısal, tetrahedral vb.)
-- Elektronegatiflik farkı ve polarite
+- Molekül geometrisi, polarite
 
-Bilimsel, kapsamlı ama anlaşılır yaz. Türkçe.`;
+Bilimsel ama anlaşılır yaz. Türkçe.`;
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
+        'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'llama-3.3-70b-versatile',
         max_tokens: 2000,
         messages: [{ role: 'user', content: prompt }],
       }),
@@ -64,17 +60,18 @@ Bilimsel, kapsamlı ama anlaşılır yaz. Türkçe.`;
 
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
-      console.error('Anthropic API error:', err);
+      console.error('Groq API error:', err);
       return res.status(502).json({ error: 'Yapay zeka servisine ulaşılamadı' });
     }
 
     const data = await response.json();
-    const text = data.content.map((i) => i.text || '').join('\n');
+    const text = data.choices?.[0]?.message?.content || '';
 
     res.setHeader('Cache-Control', 'no-store');
     return res.status(200).json({ result: text });
   } catch (err) {
     console.error('Handler error:', err);
-    return res.status(500).json({ error: 'Sunucu hatası oluştu' });
+    return res.status(500).json({ error: 'Sunucu hatası: ' + err.message });
   }
 }
+
