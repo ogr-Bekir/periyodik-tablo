@@ -5,97 +5,47 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Periyodik Tablo — Bileşik Analiz</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet" />
   <style>
     :root {
       --bg: #0d0f14;
       --surface: #161920;
       --surface2: #1e2229;
       --border: rgba(255,255,255,0.07);
-      --border-hover: rgba(255,255,255,0.15);
+      --border-strong: rgba(255,255,255,0.15);
       --text: #e8eaf0;
       --muted: #6b7280;
       --accent: #4ade80;
-      --accent-dim: rgba(74,222,128,0.12);
+      --accent-dim: rgba(74,222,128,0.1);
+      --accent-border: rgba(74,222,128,0.3);
 
-      --nonmetal: #2d4a1e;
-      --nonmetal-t: #86efac;
-      --noble: #3b2d0a;
-      --noble-t: #fcd34d;
-      --alkali: #3b0f0f;
-      --alkali-t: #fca5a5;
-      --alkearth: #3b2500;
-      --alkearth-t: #fdba74;
-      --metalloid: #0f3b3b;
-      --metalloid-t: #67e8f9;
-      --halogen: #0f1f3b;
-      --halogen-t: #93c5fd;
-      --transition: #1a0f3b;
-      --transition-t: #c4b5fd;
-      --postrans: #1f1f2e;
-      --postrans-t: #a5b4fc;
-      --lanthanide: #2d0f2d;
-      --lanthanide-t: #f0abfc;
-      --actinide: #3b0f1a;
-      --actinide-t: #fda4af;
+      --nonmetal: #1a3010; --nonmetal-t: #86efac;
+      --noble: #2d2000; --noble-t: #fcd34d;
+      --alkali: #2d0a0a; --alkali-t: #fca5a5;
+      --alkearth: #2d1a00; --alkearth-t: #fdba74;
+      --metalloid: #002d2d; --metalloid-t: #67e8f9;
+      --halogen: #001530; --halogen-t: #93c5fd;
+      --transition: #12083a; --transition-t: #c4b5fd;
+      --postrans: #141420; --postrans-t: #a5b4fc;
+      --lanthanide: #220a22; --lanthanide-t: #f0abfc;
+      --actinide: #2d0a12; --actinide-t: #fda4af;
     }
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; padding: 1.5rem; }
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      min-height: 100vh;
-      padding: 2rem 1.5rem;
-    }
+    header { display: flex; align-items: baseline; gap: 1rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    header h1 { font-family: 'Space Mono', monospace; font-size: 1rem; font-weight: 700; color: var(--accent); }
+    header p { font-size: 0.78rem; color: var(--muted); }
 
-    header {
-      display: flex;
-      align-items: baseline;
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-
-    header h1 {
-      font-family: 'Space Mono', monospace;
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--accent);
-      letter-spacing: -0.02em;
-    }
-
-    header p {
-      font-size: 0.8rem;
-      color: var(--muted);
-    }
-
-    #legend {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 1.25rem;
-    }
-
-    .leg {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 10px;
-      color: var(--muted);
-    }
-
-    .leg-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 2px;
-    }
+    #legend { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1rem; }
+    .leg { display: flex; align-items: center; gap: 4px; font-size: 9px; color: var(--muted); }
+    .leg-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
 
     #pt-grid {
       display: grid;
       grid-template-columns: repeat(18, minmax(0, 1fr));
       gap: 2px;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.25rem;
     }
 
     .el-cell {
@@ -107,208 +57,149 @@
       align-items: center;
       justify-content: center;
       border: 1px solid transparent;
-      transition: transform 0.1s ease, border-color 0.1s ease, box-shadow 0.1s ease;
+      transition: transform 0.1s, border-color 0.1s;
       min-width: 0;
-      padding: 1px;
       position: relative;
+      user-select: none;
     }
-
-    .el-cell:hover {
-      transform: scale(1.2);
-      z-index: 20;
-      border-color: rgba(255,255,255,0.3);
-    }
-
-    .el-cell.selected {
-      border-color: var(--accent) !important;
-      box-shadow: 0 0 0 1px var(--accent);
-      transform: scale(1.05);
-      z-index: 10;
-    }
-
-    .el-cell .sym {
+    .el-cell:hover { transform: scale(1.25); z-index: 20; border-color: rgba(255,255,255,0.3); }
+    .el-cell.selected { border-color: var(--accent) !important; box-shadow: 0 0 0 1px var(--accent); }
+    .el-cell .sym { font-family: 'Space Mono', monospace; font-size: clamp(5px, 1.1vw, 9px); font-weight: 700; line-height: 1; }
+    .el-cell .num { font-size: clamp(4px, 0.7vw, 6px); opacity: 0.55; line-height: 1; }
+    .el-cell .count-badge {
+      position: absolute;
+      top: 1px; right: 2px;
       font-family: 'Space Mono', monospace;
-      font-size: clamp(6px, 1.2vw, 10px);
+      font-size: clamp(4px, 0.7vw, 7px);
       font-weight: 700;
+      color: var(--accent);
       line-height: 1;
     }
-
-    .el-cell .num {
-      font-size: clamp(4px, 0.8vw, 7px);
-      opacity: 0.6;
-      line-height: 1;
-    }
-
     .el-cell.empty { cursor: default; background: transparent !important; border: none; }
 
-    .cat-nonmetal    { background: var(--nonmetal);   color: var(--nonmetal-t); }
-    .cat-noble       { background: var(--noble);       color: var(--noble-t); }
-    .cat-alkali      { background: var(--alkali);      color: var(--alkali-t); }
-    .cat-alkearth    { background: var(--alkearth);    color: var(--alkearth-t); }
-    .cat-metalloid   { background: var(--metalloid);   color: var(--metalloid-t); }
-    .cat-halogen     { background: var(--halogen);     color: var(--halogen-t); }
-    .cat-transition  { background: var(--transition);  color: var(--transition-t); }
-    .cat-postrans    { background: var(--postrans);    color: var(--postrans-t); }
-    .cat-lanthanide  { background: var(--lanthanide);  color: var(--lanthanide-t); }
-    .cat-actinide    { background: var(--actinide);    color: var(--actinide-t); }
+    .cat-nonmetal   { background: var(--nonmetal);   color: var(--nonmetal-t); }
+    .cat-noble      { background: var(--noble);       color: var(--noble-t); }
+    .cat-alkali     { background: var(--alkali);      color: var(--alkali-t); }
+    .cat-alkearth   { background: var(--alkearth);    color: var(--alkearth-t); }
+    .cat-metalloid  { background: var(--metalloid);   color: var(--metalloid-t); }
+    .cat-halogen    { background: var(--halogen);     color: var(--halogen-t); }
+    .cat-transition { background: var(--transition);  color: var(--transition-t); }
+    .cat-postrans   { background: var(--postrans);    color: var(--postrans-t); }
+    .cat-lanthanide { background: var(--lanthanide);  color: var(--lanthanide-t); }
+    .cat-actinide   { background: var(--actinide);    color: var(--actinide-t); }
 
-    #basket-bar {
+    #formula-bar {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 12px 16px;
+      padding: 10px 14px;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       flex-wrap: wrap;
-      margin-bottom: 1.25rem;
+      margin-bottom: 1rem;
     }
-
-    #basket-label {
-      font-family: 'Space Mono', monospace;
-      font-size: 10px;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      flex-shrink: 0;
-    }
-
-    #basket-chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
+    #formula-label { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; flex-shrink: 0; }
+    #formula-display {
       flex: 1;
       min-height: 28px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
       align-items: center;
     }
-
-    .chip {
+    .f-chip {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
       background: var(--accent-dim);
-      border: 1px solid rgba(74,222,128,0.25);
-      border-radius: 99px;
-      padding: 3px 10px 3px 12px;
+      border: 1px solid var(--accent-border);
+      border-radius: 6px;
+      padding: 2px 8px;
       font-family: 'Space Mono', monospace;
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 700;
       color: var(--accent);
-      cursor: default;
-    }
-
-    .chip-rm {
       cursor: pointer;
-      font-size: 14px;
-      color: rgba(74,222,128,0.5);
-      line-height: 1;
-      transition: color 0.1s;
+      transition: background 0.1s;
     }
-    .chip-rm:hover { color: var(--accent); }
+    .f-chip:hover { background: rgba(74,222,128,0.2); }
+    .f-chip .f-sub { font-size: 9px; vertical-align: sub; }
+    .f-chip .f-rm { font-size: 13px; color: rgba(74,222,128,0.4); margin-left: 3px; transition: color 0.1s; }
+    .f-chip:hover .f-rm { color: var(--accent); }
+    #formula-empty { font-size: 12px; color: var(--muted); font-style: italic; }
 
-    #basket-empty {
-      font-size: 12px;
-      color: var(--muted);
-      font-style: italic;
+    #formula-text {
+      font-family: 'Space Mono', monospace;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.05em;
+      min-width: 60px;
     }
+
+    #clear-btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border-strong);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    #clear-btn:hover { color: var(--text); border-color: var(--text); }
 
     #analyze-btn {
       font-family: 'Space Mono', monospace;
       font-size: 11px;
       font-weight: 700;
-      letter-spacing: 0.04em;
       padding: 8px 18px;
       border-radius: 7px;
-      border: 1px solid rgba(74,222,128,0.4);
+      border: 1px solid var(--accent-border);
       background: var(--accent-dim);
       color: var(--accent);
       cursor: pointer;
       flex-shrink: 0;
-      transition: background 0.15s, border-color 0.15s;
+      transition: background 0.15s;
     }
-    #analyze-btn:hover:not(:disabled) {
-      background: rgba(74,222,128,0.2);
-      border-color: rgba(74,222,128,0.7);
-    }
-    #analyze-btn:disabled {
-      opacity: 0.3;
-      cursor: not-allowed;
-    }
+    #analyze-btn:hover:not(:disabled) { background: rgba(74,222,128,0.2); }
+    #analyze-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
     #result-panel {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 20px;
-      min-height: 100px;
+      padding: 18px 20px;
+      min-height: 90px;
     }
-
-    #result-placeholder {
-      font-size: 13px;
-      color: var(--muted);
-      font-style: italic;
-    }
-
-    #result-content {
-      display: none;
-      font-size: 14px;
-      line-height: 1.75;
-      color: var(--text);
-    }
-
+    #result-placeholder { font-size: 13px; color: var(--muted); font-style: italic; }
+    #loading-state { display: none; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); }
+    .spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.1); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #error-msg { display: none; font-size: 13px; color: #fca5a5; padding: 8px 12px; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 6px; margin-bottom: 8px; }
+    #result-content { display: none; font-size: 13.5px; line-height: 1.8; color: #c9cbd5; }
     #result-content h3 {
       font-family: 'Space Mono', monospace;
-      font-size: 11px;
+      font-size: 10px;
       text-transform: uppercase;
       letter-spacing: 0.1em;
       color: var(--accent);
-      margin: 1.25rem 0 0.5rem;
+      margin: 1.2rem 0 0.5rem;
       border-bottom: 1px solid var(--border);
-      padding-bottom: 6px;
+      padding-bottom: 5px;
     }
     #result-content h3:first-child { margin-top: 0; }
+    #result-content p { margin-bottom: 0.4rem; }
+    #result-content strong { color: var(--text); font-weight: 500; }
 
-    #result-content p {
-      margin-bottom: 0.5rem;
-      color: #c9cbd5;
-    }
-
-    #loading-state {
-      display: none;
-      align-items: center;
-      gap: 10px;
-      font-size: 13px;
-      color: var(--muted);
-    }
-
-    .spinner {
-      width: 14px;
-      height: 14px;
-      border: 2px solid var(--border-hover);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    #error-msg {
-      display: none;
-      font-size: 13px;
-      color: #fca5a5;
-      padding: 8px 12px;
-      background: rgba(239,68,68,0.1);
-      border: 1px solid rgba(239,68,68,0.2);
-      border-radius: 6px;
-    }
-
-    .tooltip {
+    .tooltip-el {
       position: absolute;
-      bottom: 110%;
+      bottom: 115%;
       left: 50%;
       transform: translateX(-50%);
-      background: #1e2229;
-      border: 1px solid var(--border-hover);
+      background: var(--surface2);
+      border: 1px solid var(--border-strong);
       color: var(--text);
       font-size: 10px;
       white-space: nowrap;
@@ -316,277 +207,296 @@
       border-radius: 4px;
       pointer-events: none;
       opacity: 0;
-      transition: opacity 0.15s;
+      transition: opacity 0.12s;
       z-index: 100;
     }
-    .el-cell:hover .tooltip { opacity: 1; }
+    .el-cell:hover .tooltip-el { opacity: 1; }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>⬡ Periyodik Tablo</h1>
-    <p>Element seç → Analiz et → Bileşik keşfet</p>
-  </header>
+<header>
+  <h1>⬡ Periyodik Tablo</h1>
+  <p>Tıkla = ekle, tekrar tıkla = say artır, chip'e tıkla = sil</p>
+</header>
 
-  <div id="legend">
-    <span class="leg"><span class="leg-dot" style="background:var(--nonmetal-t)"></span>Ametal</span>
-    <span class="leg"><span class="leg-dot" style="background:var(--noble-t)"></span>Soy gaz</span>
-    <span class="leg"><span class="leg-dot" style="background:var(--alkali-t)"></span>Alkali</span>
-    <span class="leg"><span class="leg-dot" style="background:var(--alkearth-t)"></span>Toprak alk.</span>
-    <span class="leg"><span class="leg-dot" style="background:var(--metalloid-t)"></span>Yarımetal</span>
-    <span class="leg"><span class="leg-dot" style="background:var(--halogen-t)"></span>Halojen</span>
-    <span class="leg"><span class="leg-dot" style="background:var(--transition-t)"></span>Geçiş met.</span>
-    <span class="leg"><span class="leg-dot" style="background:var(--postrans-t)"></span>Post-geçiş</span>
-    <span class="leg"><span class="leg-dot" style="background:var(--lanthanide-t)"></span>Lantanid</span>
-    <span class="leg"><span class="leg-dot" style="background:var(--actinide-t)"></span>Aktinid</span>
+<div id="legend">
+  <span class="leg"><span class="leg-dot" style="background:var(--nonmetal-t)"></span>Ametal</span>
+  <span class="leg"><span class="leg-dot" style="background:var(--noble-t)"></span>Soy gaz</span>
+  <span class="leg"><span class="leg-dot" style="background:var(--alkali-t)"></span>Alkali</span>
+  <span class="leg"><span class="leg-dot" style="background:var(--alkearth-t)"></span>Toprak alk.</span>
+  <span class="leg"><span class="leg-dot" style="background:var(--metalloid-t)"></span>Yarımetal</span>
+  <span class="leg"><span class="leg-dot" style="background:var(--halogen-t)"></span>Halojen</span>
+  <span class="leg"><span class="leg-dot" style="background:var(--transition-t)"></span>Geçiş met.</span>
+  <span class="leg"><span class="leg-dot" style="background:var(--postrans-t)"></span>Post-geçiş</span>
+  <span class="leg"><span class="leg-dot" style="background:var(--lanthanide-t)"></span>Lantanid</span>
+  <span class="leg"><span class="leg-dot" style="background:var(--actinide-t)"></span>Aktinid</span>
+</div>
+
+<div id="pt-grid"></div>
+
+<div id="formula-bar">
+  <span id="formula-label">Formül</span>
+  <div id="formula-display">
+    <span id="formula-empty">Element seçmek için tabloya tıkla</span>
   </div>
+  <span id="formula-text"></span>
+  <button id="clear-btn" onclick="clearAll()" style="display:none">Temizle</button>
+  <button id="analyze-btn" disabled onclick="analyze()">Analiz Et →</button>
+</div>
 
-  <div id="pt-grid"></div>
+<div id="result-panel">
+  <div id="loading-state"><div class="spinner"></div><span>Analiz ediliyor...</span></div>
+  <div id="error-msg"></div>
+  <p id="result-placeholder">Elementleri seçip "Analiz Et" butonuna bas.</p>
+  <div id="result-content"></div>
+</div>
 
-  <div id="basket-bar">
-    <span id="basket-label">Sepet</span>
-    <div id="basket-chips">
-      <span id="basket-empty">Element seçmek için tabloya tıkla (max 5)</span>
-    </div>
-    <button id="analyze-btn" disabled onclick="analyze()">Analiz Et →</button>
-  </div>
+<script>
+const ELEMENTS = [
+  {n:1,sym:'H',name:'Hidrojen',cat:'nonmetal',col:1,row:1},
+  {n:2,sym:'He',name:'Helyum',cat:'noble',col:18,row:1},
+  {n:3,sym:'Li',name:'Lityum',cat:'alkali',col:1,row:2},
+  {n:4,sym:'Be',name:'Berilyum',cat:'alkearth',col:2,row:2},
+  {n:5,sym:'B',name:'Bor',cat:'metalloid',col:13,row:2},
+  {n:6,sym:'C',name:'Karbon',cat:'nonmetal',col:14,row:2},
+  {n:7,sym:'N',name:'Azot',cat:'nonmetal',col:15,row:2},
+  {n:8,sym:'O',name:'Oksijen',cat:'nonmetal',col:16,row:2},
+  {n:9,sym:'F',name:'Flor',cat:'halogen',col:17,row:2},
+  {n:10,sym:'Ne',name:'Neon',cat:'noble',col:18,row:2},
+  {n:11,sym:'Na',name:'Sodyum',cat:'alkali',col:1,row:3},
+  {n:12,sym:'Mg',name:'Magnezyum',cat:'alkearth',col:2,row:3},
+  {n:13,sym:'Al',name:'Alüminyum',cat:'postrans',col:13,row:3},
+  {n:14,sym:'Si',name:'Silisyum',cat:'metalloid',col:14,row:3},
+  {n:15,sym:'P',name:'Fosfor',cat:'nonmetal',col:15,row:3},
+  {n:16,sym:'S',name:'Kükürt',cat:'nonmetal',col:16,row:3},
+  {n:17,sym:'Cl',name:'Klor',cat:'halogen',col:17,row:3},
+  {n:18,sym:'Ar',name:'Argon',cat:'noble',col:18,row:3},
+  {n:19,sym:'K',name:'Potasyum',cat:'alkali',col:1,row:4},
+  {n:20,sym:'Ca',name:'Kalsiyum',cat:'alkearth',col:2,row:4},
+  {n:21,sym:'Sc',name:'Skandiyum',cat:'transition',col:3,row:4},
+  {n:22,sym:'Ti',name:'Titanyum',cat:'transition',col:4,row:4},
+  {n:23,sym:'V',name:'Vanadyum',cat:'transition',col:5,row:4},
+  {n:24,sym:'Cr',name:'Krom',cat:'transition',col:6,row:4},
+  {n:25,sym:'Mn',name:'Manganez',cat:'transition',col:7,row:4},
+  {n:26,sym:'Fe',name:'Demir',cat:'transition',col:8,row:4},
+  {n:27,sym:'Co',name:'Kobalt',cat:'transition',col:9,row:4},
+  {n:28,sym:'Ni',name:'Nikel',cat:'transition',col:10,row:4},
+  {n:29,sym:'Cu',name:'Bakır',cat:'transition',col:11,row:4},
+  {n:30,sym:'Zn',name:'Çinko',cat:'transition',col:12,row:4},
+  {n:31,sym:'Ga',name:'Galyum',cat:'postrans',col:13,row:4},
+  {n:32,sym:'Ge',name:'Germanyum',cat:'metalloid',col:14,row:4},
+  {n:33,sym:'As',name:'Arsenik',cat:'metalloid',col:15,row:4},
+  {n:34,sym:'Se',name:'Selenyum',cat:'nonmetal',col:16,row:4},
+  {n:35,sym:'Br',name:'Brom',cat:'halogen',col:17,row:4},
+  {n:36,sym:'Kr',name:'Kripton',cat:'noble',col:18,row:4},
+  {n:37,sym:'Rb',name:'Rubidyum',cat:'alkali',col:1,row:5},
+  {n:38,sym:'Sr',name:'Stronsiyum',cat:'alkearth',col:2,row:5},
+  {n:39,sym:'Y',name:'İtriyum',cat:'transition',col:3,row:5},
+  {n:40,sym:'Zr',name:'Zirkonyum',cat:'transition',col:4,row:5},
+  {n:41,sym:'Nb',name:'Niyobyum',cat:'transition',col:5,row:5},
+  {n:42,sym:'Mo',name:'Molibden',cat:'transition',col:6,row:5},
+  {n:43,sym:'Tc',name:'Teknesyum',cat:'transition',col:7,row:5},
+  {n:44,sym:'Ru',name:'Rutenyum',cat:'transition',col:8,row:5},
+  {n:45,sym:'Rh',name:'Rodyum',cat:'transition',col:9,row:5},
+  {n:46,sym:'Pd',name:'Paladyum',cat:'transition',col:10,row:5},
+  {n:47,sym:'Ag',name:'Gümüş',cat:'transition',col:11,row:5},
+  {n:48,sym:'Cd',name:'Kadmiyum',cat:'transition',col:12,row:5},
+  {n:49,sym:'In',name:'İndiyum',cat:'postrans',col:13,row:5},
+  {n:50,sym:'Sn',name:'Kalay',cat:'postrans',col:14,row:5},
+  {n:51,sym:'Sb',name:'Antimon',cat:'metalloid',col:15,row:5},
+  {n:52,sym:'Te',name:'Tellür',cat:'metalloid',col:16,row:5},
+  {n:53,sym:'I',name:'İyot',cat:'halogen',col:17,row:5},
+  {n:54,sym:'Xe',name:'Ksenon',cat:'noble',col:18,row:5},
+  {n:55,sym:'Cs',name:'Sezyum',cat:'alkali',col:1,row:6},
+  {n:56,sym:'Ba',name:'Baryum',cat:'alkearth',col:2,row:6},
+  {n:72,sym:'Hf',name:'Hafniyum',cat:'transition',col:4,row:6},
+  {n:73,sym:'Ta',name:'Tantal',cat:'transition',col:5,row:6},
+  {n:74,sym:'W',name:'Tungsten',cat:'transition',col:6,row:6},
+  {n:75,sym:'Re',name:'Renyum',cat:'transition',col:7,row:6},
+  {n:76,sym:'Os',name:'Osmiyum',cat:'transition',col:8,row:6},
+  {n:77,sym:'Ir',name:'İridyum',cat:'transition',col:9,row:6},
+  {n:78,sym:'Pt',name:'Platin',cat:'transition',col:10,row:6},
+  {n:79,sym:'Au',name:'Altın',cat:'transition',col:11,row:6},
+  {n:80,sym:'Hg',name:'Cıva',cat:'transition',col:12,row:6},
+  {n:81,sym:'Tl',name:'Talyum',cat:'postrans',col:13,row:6},
+  {n:82,sym:'Pb',name:'Kurşun',cat:'postrans',col:14,row:6},
+  {n:83,sym:'Bi',name:'Bizmut',cat:'postrans',col:15,row:6},
+  {n:84,sym:'Po',name:'Polonyum',cat:'metalloid',col:16,row:6},
+  {n:85,sym:'At',name:'Astatin',cat:'halogen',col:17,row:6},
+  {n:86,sym:'Rn',name:'Radon',cat:'noble',col:18,row:6},
+  {n:87,sym:'Fr',name:'Fransiyum',cat:'alkali',col:1,row:7},
+  {n:88,sym:'Ra',name:'Radyum',cat:'alkearth',col:2,row:7},
+  {n:57,sym:'La',name:'Lantan',cat:'lanthanide',col:3,row:8},
+  {n:58,sym:'Ce',name:'Seryum',cat:'lanthanide',col:4,row:8},
+  {n:59,sym:'Pr',name:'Praseodim',cat:'lanthanide',col:5,row:8},
+  {n:60,sym:'Nd',name:'Neodim',cat:'lanthanide',col:6,row:8},
+  {n:61,sym:'Pm',name:'Prometyum',cat:'lanthanide',col:7,row:8},
+  {n:62,sym:'Sm',name:'Samaryum',cat:'lanthanide',col:8,row:8},
+  {n:63,sym:'Eu',name:'Europiyum',cat:'lanthanide',col:9,row:8},
+  {n:64,sym:'Gd',name:'Gadolinyum',cat:'lanthanide',col:10,row:8},
+  {n:65,sym:'Tb',name:'Terbiyum',cat:'lanthanide',col:11,row:8},
+  {n:66,sym:'Dy',name:'Disprosyum',cat:'lanthanide',col:12,row:8},
+  {n:67,sym:'Ho',name:'Holmiyum',cat:'lanthanide',col:13,row:8},
+  {n:68,sym:'Er',name:'Erbiyum',cat:'lanthanide',col:14,row:8},
+  {n:69,sym:'Tm',name:'Tulyum',cat:'lanthanide',col:15,row:8},
+  {n:70,sym:'Yb',name:'İterbiyum',cat:'lanthanide',col:16,row:8},
+  {n:71,sym:'Lu',name:'Lutesyum',cat:'lanthanide',col:17,row:8},
+  {n:89,sym:'Ac',name:'Aktinyum',cat:'actinide',col:3,row:9},
+  {n:90,sym:'Th',name:'Toryum',cat:'actinide',col:4,row:9},
+  {n:91,sym:'Pa',name:'Protaktinyum',cat:'actinide',col:5,row:9},
+  {n:92,sym:'U',name:'Uranyum',cat:'actinide',col:6,row:9},
+  {n:93,sym:'Np',name:'Neptünyum',cat:'actinide',col:7,row:9},
+  {n:94,sym:'Pu',name:'Plutonyum',cat:'actinide',col:8,row:9},
+  {n:95,sym:'Am',name:'Amerikyum',cat:'actinide',col:9,row:9},
+  {n:96,sym:'Cm',name:'Küryum',cat:'actinide',col:10,row:9},
+  {n:97,sym:'Bk',name:'Berkelyum',cat:'actinide',col:11,row:9},
+  {n:98,sym:'Cf',name:'Kaliforniyum',cat:'actinide',col:12,row:9},
+];
 
-  <div id="result-panel">
-    <div id="loading-state">
-      <div class="spinner"></div>
-      <span>Analiz ediliyor...</span>
-    </div>
-    <div id="error-msg"></div>
-    <p id="result-placeholder">Elementleri seçip "Analiz Et" butonuna bas.</p>
-    <div id="result-content"></div>
-  </div>
+// counts: { sym: count }
+const counts = {};
 
-  <script>
-    const ELEMENTS = [
-      {n:1,sym:'H',name:'Hidrojen',cat:'nonmetal',col:1,row:1},
-      {n:2,sym:'He',name:'Helyum',cat:'noble',col:18,row:1},
-      {n:3,sym:'Li',name:'Lityum',cat:'alkali',col:1,row:2},
-      {n:4,sym:'Be',name:'Berilyum',cat:'alkearth',col:2,row:2},
-      {n:5,sym:'B',name:'Bor',cat:'metalloid',col:13,row:2},
-      {n:6,sym:'C',name:'Karbon',cat:'nonmetal',col:14,row:2},
-      {n:7,sym:'N',name:'Azot',cat:'nonmetal',col:15,row:2},
-      {n:8,sym:'O',name:'Oksijen',cat:'nonmetal',col:16,row:2},
-      {n:9,sym:'F',name:'Flor',cat:'halogen',col:17,row:2},
-      {n:10,sym:'Ne',name:'Neon',cat:'noble',col:18,row:2},
-      {n:11,sym:'Na',name:'Sodyum',cat:'alkali',col:1,row:3},
-      {n:12,sym:'Mg',name:'Magnezyum',cat:'alkearth',col:2,row:3},
-      {n:13,sym:'Al',name:'Alüminyum',cat:'postrans',col:13,row:3},
-      {n:14,sym:'Si',name:'Silisyum',cat:'metalloid',col:14,row:3},
-      {n:15,sym:'P',name:'Fosfor',cat:'nonmetal',col:15,row:3},
-      {n:16,sym:'S',name:'Kükürt',cat:'nonmetal',col:16,row:3},
-      {n:17,sym:'Cl',name:'Klor',cat:'halogen',col:17,row:3},
-      {n:18,sym:'Ar',name:'Argon',cat:'noble',col:18,row:3},
-      {n:19,sym:'K',name:'Potasyum',cat:'alkali',col:1,row:4},
-      {n:20,sym:'Ca',name:'Kalsiyum',cat:'alkearth',col:2,row:4},
-      {n:21,sym:'Sc',name:'Skandiyum',cat:'transition',col:3,row:4},
-      {n:22,sym:'Ti',name:'Titanyum',cat:'transition',col:4,row:4},
-      {n:23,sym:'V',name:'Vanadyum',cat:'transition',col:5,row:4},
-      {n:24,sym:'Cr',name:'Krom',cat:'transition',col:6,row:4},
-      {n:25,sym:'Mn',name:'Manganez',cat:'transition',col:7,row:4},
-      {n:26,sym:'Fe',name:'Demir',cat:'transition',col:8,row:4},
-      {n:27,sym:'Co',name:'Kobalt',cat:'transition',col:9,row:4},
-      {n:28,sym:'Ni',name:'Nikel',cat:'transition',col:10,row:4},
-      {n:29,sym:'Cu',name:'Bakır',cat:'transition',col:11,row:4},
-      {n:30,sym:'Zn',name:'Çinko',cat:'transition',col:12,row:4},
-      {n:31,sym:'Ga',name:'Galyum',cat:'postrans',col:13,row:4},
-      {n:32,sym:'Ge',name:'Germanyum',cat:'metalloid',col:14,row:4},
-      {n:33,sym:'As',name:'Arsenik',cat:'metalloid',col:15,row:4},
-      {n:34,sym:'Se',name:'Selenyum',cat:'nonmetal',col:16,row:4},
-      {n:35,sym:'Br',name:'Brom',cat:'halogen',col:17,row:4},
-      {n:36,sym:'Kr',name:'Kripton',cat:'noble',col:18,row:4},
-      {n:37,sym:'Rb',name:'Rubidyum',cat:'alkali',col:1,row:5},
-      {n:38,sym:'Sr',name:'Stronsiyum',cat:'alkearth',col:2,row:5},
-      {n:39,sym:'Y',name:'İtriyum',cat:'transition',col:3,row:5},
-      {n:40,sym:'Zr',name:'Zirkonyum',cat:'transition',col:4,row:5},
-      {n:41,sym:'Nb',name:'Niyobyum',cat:'transition',col:5,row:5},
-      {n:42,sym:'Mo',name:'Molibden',cat:'transition',col:6,row:5},
-      {n:43,sym:'Tc',name:'Teknesyum',cat:'transition',col:7,row:5},
-      {n:44,sym:'Ru',name:'Rutenyum',cat:'transition',col:8,row:5},
-      {n:45,sym:'Rh',name:'Rodyum',cat:'transition',col:9,row:5},
-      {n:46,sym:'Pd',name:'Paladyum',cat:'transition',col:10,row:5},
-      {n:47,sym:'Ag',name:'Gümüş',cat:'transition',col:11,row:5},
-      {n:48,sym:'Cd',name:'Kadmiyum',cat:'transition',col:12,row:5},
-      {n:49,sym:'In',name:'İndiyum',cat:'postrans',col:13,row:5},
-      {n:50,sym:'Sn',name:'Kalay',cat:'postrans',col:14,row:5},
-      {n:51,sym:'Sb',name:'Antimon',cat:'metalloid',col:15,row:5},
-      {n:52,sym:'Te',name:'Tellür',cat:'metalloid',col:16,row:5},
-      {n:53,sym:'I',name:'İyot',cat:'halogen',col:17,row:5},
-      {n:54,sym:'Xe',name:'Ksenon',cat:'noble',col:18,row:5},
-      {n:55,sym:'Cs',name:'Sezyum',cat:'alkali',col:1,row:6},
-      {n:56,sym:'Ba',name:'Baryum',cat:'alkearth',col:2,row:6},
-      {n:72,sym:'Hf',name:'Hafniyum',cat:'transition',col:4,row:6},
-      {n:73,sym:'Ta',name:'Tantal',cat:'transition',col:5,row:6},
-      {n:74,sym:'W',name:'Tungsten',cat:'transition',col:6,row:6},
-      {n:75,sym:'Re',name:'Renyum',cat:'transition',col:7,row:6},
-      {n:76,sym:'Os',name:'Osmiyum',cat:'transition',col:8,row:6},
-      {n:77,sym:'Ir',name:'İridyum',cat:'transition',col:9,row:6},
-      {n:78,sym:'Pt',name:'Platin',cat:'transition',col:10,row:6},
-      {n:79,sym:'Au',name:'Altın',cat:'transition',col:11,row:6},
-      {n:80,sym:'Hg',name:'Cıva',cat:'transition',col:12,row:6},
-      {n:81,sym:'Tl',name:'Talyum',cat:'postrans',col:13,row:6},
-      {n:82,sym:'Pb',name:'Kurşun',cat:'postrans',col:14,row:6},
-      {n:83,sym:'Bi',name:'Bizmut',cat:'postrans',col:15,row:6},
-      {n:84,sym:'Po',name:'Polonyum',cat:'metalloid',col:16,row:6},
-      {n:85,sym:'At',name:'Astatin',cat:'halogen',col:17,row:6},
-      {n:86,sym:'Rn',name:'Radon',cat:'noble',col:18,row:6},
-      {n:87,sym:'Fr',name:'Fransiyum',cat:'alkali',col:1,row:7},
-      {n:88,sym:'Ra',name:'Radyum',cat:'alkearth',col:2,row:7},
-      {n:57,sym:'La',name:'Lantan',cat:'lanthanide',col:3,row:8},
-      {n:58,sym:'Ce',name:'Seryum',cat:'lanthanide',col:4,row:8},
-      {n:59,sym:'Pr',name:'Praseodim',cat:'lanthanide',col:5,row:8},
-      {n:60,sym:'Nd',name:'Neodim',cat:'lanthanide',col:6,row:8},
-      {n:61,sym:'Pm',name:'Prometyum',cat:'lanthanide',col:7,row:8},
-      {n:62,sym:'Sm',name:'Samaryum',cat:'lanthanide',col:8,row:8},
-      {n:63,sym:'Eu',name:'Europiyum',cat:'lanthanide',col:9,row:8},
-      {n:64,sym:'Gd',name:'Gadolinyum',cat:'lanthanide',col:10,row:8},
-      {n:65,sym:'Tb',name:'Terbiyum',cat:'lanthanide',col:11,row:8},
-      {n:66,sym:'Dy',name:'Disprosyum',cat:'lanthanide',col:12,row:8},
-      {n:67,sym:'Ho',name:'Holmiyum',cat:'lanthanide',col:13,row:8},
-      {n:68,sym:'Er',name:'Erbiyum',cat:'lanthanide',col:14,row:8},
-      {n:69,sym:'Tm',name:'Tulyum',cat:'lanthanide',col:15,row:8},
-      {n:70,sym:'Yb',name:'İterbiyum',cat:'lanthanide',col:16,row:8},
-      {n:71,sym:'Lu',name:'Lutesyum',cat:'lanthanide',col:17,row:8},
-      {n:89,sym:'Ac',name:'Aktinyum',cat:'actinide',col:3,row:9},
-      {n:90,sym:'Th',name:'Toryum',cat:'actinide',col:4,row:9},
-      {n:91,sym:'Pa',name:'Protaktinyum',cat:'actinide',col:5,row:9},
-      {n:92,sym:'U',name:'Uranyum',cat:'actinide',col:6,row:9},
-      {n:93,sym:'Np',name:'Neptünyum',cat:'actinide',col:7,row:9},
-      {n:94,sym:'Pu',name:'Plutonyum',cat:'actinide',col:8,row:9},
-      {n:95,sym:'Am',name:'Amerikyum',cat:'actinide',col:9,row:9},
-      {n:96,sym:'Cm',name:'Küryum',cat:'actinide',col:10,row:9},
-      {n:97,sym:'Bk',name:'Berkelyum',cat:'actinide',col:11,row:9},
-      {n:98,sym:'Cf',name:'Kaliforniyum',cat:'actinide',col:12,row:9},
-    ];
-
-    const basket = new Set();
-
-    function buildGrid() {
-      const grid = document.getElementById('pt-grid');
-      const map = {};
-      ELEMENTS.forEach(e => { map[`${e.row}-${e.col}`] = e; });
-      for (let row = 1; row <= 9; row++) {
-        for (let col = 1; col <= 18; col++) {
-          const el = map[`${row}-${col}`];
-          const cell = document.createElement('div');
-          if (!el) {
-            cell.className = 'el-cell empty';
-          } else {
-            cell.className = `el-cell cat-${el.cat}`;
-            cell.innerHTML = `<span class="sym">${el.sym}</span><span class="num">${el.n}</span><span class="tooltip">${el.name}</span>`;
-            cell.dataset.sym = el.sym;
-            cell.onclick = () => toggleElement(el, cell);
-          }
-          grid.appendChild(cell);
-        }
-      }
-    }
-
-    function toggleElement(el, cell) {
-      if (basket.has(el.sym)) {
-        basket.delete(el.sym);
-        cell.classList.remove('selected');
+function buildGrid() {
+  const grid = document.getElementById('pt-grid');
+  const map = {};
+  ELEMENTS.forEach(e => { map[`${e.row}-${e.col}`] = e; });
+  for (let row = 1; row <= 9; row++) {
+    for (let col = 1; col <= 18; col++) {
+      const el = map[`${row}-${col}`];
+      const cell = document.createElement('div');
+      if (!el) {
+        cell.className = 'el-cell empty';
       } else {
-        if (basket.size >= 5) return;
-        basket.add(el.sym);
-        cell.classList.add('selected');
+        cell.className = `el-cell cat-${el.cat}`;
+        cell.dataset.sym = el.sym;
+        cell.innerHTML = `<span class="sym">${el.sym}</span><span class="num">${el.n}</span><span class="count-badge"></span><span class="tooltip-el">${el.name}</span>`;
+        cell.addEventListener('click', () => addElement(el.sym));
       }
-      renderBasket();
+      grid.appendChild(cell);
     }
+  }
+}
 
-    function removeChip(sym) {
-      basket.delete(sym);
-      const cell = document.querySelector(`.el-cell[data-sym="${sym}"]`);
-      if (cell) cell.classList.remove('selected');
-      renderBasket();
-    }
+function addElement(sym) {
+  counts[sym] = (counts[sym] || 0) + 1;
+  updateCell(sym);
+  renderFormula();
+}
 
-    function renderBasket() {
-      const chips = document.getElementById('basket-chips');
-      const btn = document.getElementById('analyze-btn');
-      const empty = document.getElementById('basket-empty');
+function removeElement(sym) {
+  delete counts[sym];
+  updateCell(sym);
+  renderFormula();
+}
 
-      if (basket.size === 0) {
-        chips.innerHTML = '';
-        chips.appendChild(document.getElementById('basket-empty') || (() => {
-          const s = document.createElement('span');
-          s.id = 'basket-empty';
-          s.textContent = 'Element seçmek için tabloya tıkla (max 5)';
-          return s;
-        })());
-        btn.disabled = true;
-        return;
-      }
+function updateCell(sym) {
+  const cell = document.querySelector(`.el-cell[data-sym="${sym}"]`);
+  if (!cell) return;
+  const badge = cell.querySelector('.count-badge');
+  const c = counts[sym] || 0;
+  badge.textContent = c > 1 ? c : '';
+  cell.classList.toggle('selected', c > 0);
+}
 
-      chips.innerHTML = '';
-      basket.forEach(sym => {
-        const chip = document.createElement('span');
-        chip.className = 'chip';
-        chip.innerHTML = `${sym}<span class="chip-rm" onclick="removeChip('${sym}')">×</span>`;
-        chips.appendChild(chip);
-      });
-      btn.disabled = false;
-    }
+function clearAll() {
+  Object.keys(counts).forEach(sym => {
+    delete counts[sym];
+    updateCell(sym);
+  });
+  renderFormula();
+}
 
-    async function analyze() {
-      const elements = Array.from(basket);
-      const loading = document.getElementById('loading-state');
-      const placeholder = document.getElementById('result-placeholder');
-      const content = document.getElementById('result-content');
-      const errorMsg = document.getElementById('error-msg');
-      const btn = document.getElementById('analyze-btn');
+function buildFormulaString() {
+  return Object.entries(counts)
+    .filter(([, c]) => c > 0)
+    .map(([sym, c]) => c === 1 ? sym : `${sym}${c}`)
+    .join('');
+}
 
-      placeholder.style.display = 'none';
-      content.style.display = 'none';
-      errorMsg.style.display = 'none';
-      loading.style.display = 'flex';
-      btn.disabled = true;
+function renderFormula() {
+  const display = document.getElementById('formula-display');
+  const formulaText = document.getElementById('formula-text');
+  const clearBtn = document.getElementById('clear-btn');
+  const analyzeBtn = document.getElementById('analyze-btn');
+  const entries = Object.entries(counts).filter(([, c]) => c > 0);
 
-      try {
-        const res = await fetch('/api/analyze', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ elements }),
-        });
+  if (entries.length === 0) {
+    display.innerHTML = '<span id="formula-empty">Element seçmek için tabloya tıkla</span>';
+    formulaText.textContent = '';
+    clearBtn.style.display = 'none';
+    analyzeBtn.disabled = true;
+    return;
+  }
 
-        const data = await res.json();
+  display.innerHTML = '';
+  entries.forEach(([sym, c]) => {
+    const chip = document.createElement('span');
+    chip.className = 'f-chip';
+    chip.innerHTML = sym + (c > 1 ? `<span class="f-sub">${c}</span>` : '') + `<span class="f-rm" data-sym="${sym}">×</span>`;
+    chip.querySelector('.f-rm').addEventListener('click', (e) => {
+      e.stopPropagation();
+      removeElement(sym);
+    });
+    display.appendChild(chip);
+  });
 
-        if (!res.ok) {
-          throw new Error(data.error || 'Bilinmeyen hata');
-        }
+  formulaText.textContent = buildFormulaString();
+  clearBtn.style.display = 'inline-block';
+  analyzeBtn.disabled = false;
+}
 
-        content.innerHTML = formatResult(data.result);
-        content.style.display = 'block';
-      } catch (err) {
-        errorMsg.textContent = 'Hata: ' + (err.message || 'Sunucuya ulaşılamadı. Lütfen tekrar dene.');
-        errorMsg.style.display = 'block';
-      } finally {
-        loading.style.display = 'none';
-        btn.disabled = false;
-      }
-    }
+async function analyze() {
+  const formula = buildFormulaString();
+  if (!formula) return;
 
-    function formatResult(text) {
-      return text
-        .replace(/\*\*(.+?)\*\*/g, '<h3>$1</h3>')
-        .replace(/\*(.+?)\*/g, '<strong>$1</strong>')
-        .split('\n')
-        .map(line => {
-          line = line.trim();
-          if (!line) return '';
-          if (line.startsWith('<h3>')) return line;
-          return `<p>${line}</p>`;
-        })
-        .join('');
-    }
+  const loading = document.getElementById('loading-state');
+  const placeholder = document.getElementById('result-placeholder');
+  const content = document.getElementById('result-content');
+  const errorMsg = document.getElementById('error-msg');
+  const btn = document.getElementById('analyze-btn');
 
-    buildGrid();
-    renderBasket();
-  </script>
+  placeholder.style.display = 'none';
+  content.style.display = 'none';
+  errorMsg.style.display = 'none';
+  loading.style.display = 'flex';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ formula }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Bilinmeyen hata');
+    content.innerHTML = formatResult(data.result);
+    content.style.display = 'block';
+  } catch (err) {
+    errorMsg.textContent = 'Hata: ' + (err.message || 'Sunucuya ulaşılamadı');
+    errorMsg.style.display = 'block';
+  } finally {
+    loading.style.display = 'none';
+    btn.disabled = false;
+  }
+}
+
+function formatResult(text) {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '<h3>$1</h3>')
+    .replace(/\*(.+?)\*/g, '<strong>$1</strong>')
+    .split('\n')
+    .map(line => {
+      line = line.trim();
+      if (!line) return '';
+      if (line.startsWith('<h3>')) return line;
+      return `<p>${line}</p>`;
+    })
+    .join('');
+}
+
+buildGrid();
+renderFormula();
+</script>
 </body>
 </html>
