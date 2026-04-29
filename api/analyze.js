@@ -42,7 +42,7 @@ Her bileşik için:
 - Lewis yapısı veya bağ açıklaması
 - Molekül geometrisi, polarite
 
-Bilimsel ama anlaşılır yaz. Türkçe.`;
+Bilimsel ama anlaşılır yaz. her bileşiğin yanına o bileşiğin görselini PubChem den veya vikipediadan ve bileşiğin bağlarını temseil etmek için iyonik veya kovalent veya organik elementse ona göre IUPAC sembolik gösterimlerini de ekle. Türkçe.`;
 
   try {
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
