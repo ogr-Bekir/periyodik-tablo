@@ -3,14 +3,10 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { elements } = req.body;
+  const { formula } = req.body;
 
-  if (!elements || !Array.isArray(elements) || elements.length === 0) {
-    return res.status(400).json({ error: 'Geçersiz element listesi' });
-  }
-
-  if (elements.length > 5) {
-    return res.status(400).json({ error: 'En fazla 5 element gönderilebilir' });
+  if (!formula || typeof formula !== 'string' || formula.trim().length === 0) {
+    return res.status(400).json({ error: 'Geçersiz formül' });
   }
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -18,20 +14,38 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Sunucu yapılandırma hatası' });
   }
 
-  const prompt = `Sen bir kimya uzmanısın. Kullanıcı şu elementleri seçti: ${elements.join(', ')}.
+  const prompt = `Sen kapsamlı bir kimya uzmanısın. Kullanıcı şu element kombinasyonunu girdi: ${formula}
 
-Bu elementlerden oluşabilecek bileşikleri ve izotopları Türkçe olarak açıkla. Şu formatta yaz:
+Bu kombinasyondan oluşabilecek TÜM olası bileşikleri analiz et. Hem organik hem inorganik bileşikleri dahil et.
+
+Şu başlıkları kullan ve Türkçe yaz:
 
 **Olası Bileşikler:**
-Her bileşik için: kimyasal formül, tam adı, bağ türü (iyonik/kovalent/polar kovalent), temel fiziksel özellikleri (renk, hal, erime noktası varsa), kullanım alanları.
+Her bileşik için ayrı satırda:
+- Kimyasal formül ve IUPAC adı
+- Bağ türü: iyonik / kovalent / polar kovalent / metalik / koordinasyon
+- Fiziksel özellikler: hal (katı/sıvı/gaz), renk, erime/kaynama noktası
+- Kullanım alanları ve önemi
 
-**Önemli İzotoplar:**
-Her element için en önemli 1-2 izotop: sembol, kütle numarası, kararlı mı / radyoaktif mi, varsa özel kullanımı.
+**Organik Bileşikler (varsa):**
+- Fonksiyonel gruplar
+- Homolog seri / organik sınıf (alkan, alken, alkol, asit vb.)
+- Endüstriyel / biyolojik önemi
 
-**Bağ Yapısı:**
-Seçilen elementlerin elektron konfigürasyonu özeti ve nasıl bağ kurduklarına dair kısa açıklama.
+**Anot ve Katot Reaksiyonları (varsa):**
+- Elektroliz reaksiyonları
+- Anotta yükseltgenme: ...
+- Katotta indirgenme: ...
 
-Bilimsel ama anlaşılır bir dil kullan. Türkçe yaz.`;
+**İzotoplar:**
+- Her elementin önemli izotopları, kararlı/radyoaktif durumu, özel kullanımları
+
+**Bağ ve Yapı Özeti:**
+- Lewis yapısı veya bağ açıklaması
+- Geometri (varsa: doğrusal, açısal, tetrahedral vb.)
+- Elektronegatiflik farkı ve polarite
+
+Bilimsel, kapsamlı ama anlaşılır yaz. Türkçe.`;
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -43,7 +57,7 @@ Bilimsel ama anlaşılır bir dil kullan. Türkçe yaz.`;
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 1200,
+        max_tokens: 2000,
         messages: [{ role: 'user', content: prompt }],
       }),
     });
