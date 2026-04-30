@@ -16,10 +16,10 @@ export default async function handler(req, res) {
   const prompt = `Sen kapsamlı bir kimya uzmanısın. Kullanıcı şu elementleri girdi: ${formula}
 
 ÇOK ÖNEMLİ KURAL: Sadece VERİLEN elementlerin TAMAMINI veya bir kısmını kullanan bileşikleri ver. Fazladan element EKLEYEMEZSİN. Örneğin H ve O verilmişse H2SO4 veremezsin çünkü S yok.
+2D GÖRSEL KISMINDA NOKTA ÇUBUK FORMATINDA GÖRSEL ÇEK , DOĞADAKİ HALİ KISMINDA BİLEŞİĞİN DOĞADAKİ GERÇEK RESMİNİ VER. ÖRNEK: H2O İÇİN SU GÖRSELİ,NaCl için tuz görseli ekle,N6O6H12 İÇİN GLİKOZ İÇİN GLİKOZ LAKTOZ İÇİN LAKTON GÖRSELİ VB...
+E�er verilen elementlerle iyon oluşuyorsa (örn. Na+ , Cl-, OH-), sadece o iyonu ver, + VEYA  İSE ONLARI DA BELİRT, başka olasilık ekleme.
 
-E�er verilen elementlerle iyon oluşuyorsa (örn. Na+ , Cl-, OH-), sadece o iyonu ver, başka olasilık ekleme.
-
-Yanıtını SADECE geçerli JSON formatında ver, başka hiçbir şey yazma, markdown kullanma:
+Yanıtını  geçerli JSON formatında ver, markdown kullanma:
 
 {
   "bileskikler": [
